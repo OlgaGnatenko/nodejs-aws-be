@@ -3,8 +3,8 @@ const products = require("./products");
 
 module.exports.getProductById = async (event) => {
   let id = null; 
-  if (event.queryStringParameters) {
-    id =  event.queryStringParameters.id;
+  if (event.pathParameters) {
+    id =  event.pathParameters.id;
   }
   if (!id)
     return {
@@ -15,7 +15,7 @@ module.exports.getProductById = async (event) => {
       statusCode: 404,
       body: "Id is missing in the query parameters",
     };
-  const product = products.find((item) => item.id === id);
+  const product = await products.find((item) => item.id === id);
   if (!product)
     return {
       headers: {
