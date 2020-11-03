@@ -58,13 +58,20 @@ provider:
 #    - exclude-me-dir/**
 
 functions:
-  hello:
-    handler: handler.hello
+  getProducts:
+    handler: productList.getProducts
     events:
     - http:
         path: products
         method: get
         cors: true
+  getProductById:
+    handler: productById.getProductById
+    events:
+    - http:
+        path: getById
+        method: get
+        cors: true      
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details
