@@ -2,7 +2,10 @@
 const products = require("./products");
 
 module.exports.getProductById = async (event) => {
-  const { id } = event.queryStringParameters;
+  let id = null; 
+  if (event.queryStringParameters) {
+    id =  event.queryStringParameters.id;
+  }
   if (!id)
     return {
       headers: {
