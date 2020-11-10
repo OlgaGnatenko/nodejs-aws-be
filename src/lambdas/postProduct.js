@@ -86,18 +86,12 @@ module.exports.postProduct = async (event) => {
     await dbConnection.query(
       postStockQuery({ product_id: id, count: product.count })
     );
+    await dbConnection.query("COMMIT");
 
     const { rows: productWithStockRow } = await dbConnection.query(
       getProductByIdQuery(id)
     );
-    if (!productWithStockRow)
-      return {
-        headers: responseHeaders,
-        statusCode: StatusCodes.NOT_FOUND,
-        body: "Cannot POST stock: Server error",
-      };
     const productWithStock = productWithStockRow[0];
-    await dbConnection.query("COMMIT");
 
     return {
       statusCode: StatusCodes.OK,
