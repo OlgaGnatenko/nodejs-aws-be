@@ -14,17 +14,23 @@ SQL scripts are provided in `src/sql` folder
     - :thumbsup: Integrate GET/products/{productId} lambda to return a product from the database
 
 Backend endpoints:
-[GET https://jh2vjbyda1.execute-api.eu-west-1.amazonaws.com/dev/products](https://jh2vjbyda1.execute-api.eu-west-1.amazonaws.com/dev/products)
-[GET https://jh2vjbyda1.execute-api.eu-west-1.amazonaws.com/dev/products/{id}](https://jh2vjbyda1.execute-api.eu-west-1.amazonaws.com/dev/products/{id})
+GET [https://jh2vjbyda1.execute-api.eu-west-1.amazonaws.com/dev/products]
+GET [https://jh2vjbyda1.execute-api.eu-west-1.amazonaws.com/dev/products/{id}]
 
 Frontend:
-[https://d2joi2c0vsqdd3.cloudfront.net/](https://d2joi2c0vsqdd3.cloudfront.net/)
+[https://d2joi2c0vsqdd3.cloudfront.net/]
 
 - Task 4.3: 
     - :thumbsup: Implement POST/products lambda and implement its logic so it will be creating a new item in a products table.
 
 Endpoint:
-(POST https://jh2vjbyda1.execute-api.eu-west-1.amazonaws.com/dev/products)[https://jh2vjbyda1.execute-api.eu-west-1.amazonaws.com/dev/products]
+POST [https://jh2vjbyda1.execute-api.eu-west-1.amazonaws.com/dev/products]
+
+- Integration
+    - Your own Frontend application is integrated with product service (/products API) and products from product-service are represented on Frontend
+
+Frontend:
+[https://d2joi2c0vsqdd3.cloudfront.net/]
 
 ## Additional tasks
 - :thumbsup: POST/products lambda functions returns error 400 status code if product data is invalid

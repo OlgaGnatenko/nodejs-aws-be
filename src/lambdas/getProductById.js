@@ -4,14 +4,14 @@ const { responseHeaders } = require("../common/config");
 const { StatusCodes } = require("http-status-codes");
 const validate = require("uuid-validate");
 
-const getProductByIdQuery = (id) => `
+const UUID_VERSION = 4;
+
+module.exports.getProductByIdQuery = (id) => `
   select products.id, products.title, products.description, products.price, products.image, stocks."count" from products 
   left join stocks
   on stocks.product_id = products.id
   where products.id = '${id}'
 `;
-
-const UUID_VERSION = 4;
 
 module.exports.getProductById = async (event) => {
   let dbConnection = null;
@@ -31,7 +31,7 @@ module.exports.getProductById = async (event) => {
       return {
         headers: responseHeaders,
         statusCode: StatusCodes.FORBIDDEN,
-        body: "Id is not a valid UUID",
+        body: `Id ${id} is not a valid UUID`,
       };
     }
     dbConnection = await dbHelper.connectToDB();
