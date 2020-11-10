@@ -1,6 +1,7 @@
 node_modules
-jspm_packages
+.serverless
 
+jspm_packages
 
 serverless.yml 
 
