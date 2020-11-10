@@ -36,7 +36,6 @@ module.exports.postProduct = async (event) => {
     const postProductResult = await dbConnection.query(
       postProductQuery(newProduct)
     );
-    // const product = productQueryResult && productQueryResult.rows;
     if (!postProductResult)
       return {
         headers: responseHeaders,
@@ -46,7 +45,7 @@ module.exports.postProduct = async (event) => {
     return {
       statusCode: StatusCodes.OK,
       headers: responseHeaders,
-      body: JSON.stringify(postProductResult),
+      body: JSON.stringify(newProduct),
     };
   } catch (err) {
     return {
