@@ -9,7 +9,9 @@
     "serverless": "^2.10.0",
     "uuid-validate": "0.0.3"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "serverless-middleware": "0.0.10"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

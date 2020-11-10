@@ -28,6 +28,7 @@ module.exports.getProducts = async () => {
       body: "Error executing products query",
     };
   } catch (err) {
+    console.log(err);
     return {
       statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
       headers: responseHeaders,

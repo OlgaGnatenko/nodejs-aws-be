@@ -6,14 +6,14 @@ const validate = require("uuid-validate");
 
 const UUID_VERSION = 4;
 
-module.exports.getProductByIdQuery = (id) => `
+const getProductByIdQuery = (id) => `
   select products.id, products.title, products.description, products.price, products.image, stocks."count" from products 
   left join stocks
   on stocks.product_id = products.id
   where products.id = '${id}'
 `;
 
-module.exports.getProductById = async (event) => {
+const getProductById = async (event) => {
   let dbConnection = null;
 
   try {
@@ -51,6 +51,7 @@ module.exports.getProductById = async (event) => {
       body: JSON.stringify(product),
     };
   } catch (err) {
+    console.log(err);
     return {
       statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
       headers: responseHeaders,
@@ -62,4 +63,9 @@ module.exports.getProductById = async (event) => {
 
   // Use this code if you don't use the http event with the LAMBDA-PROXY integration
   // return { message: 'Go Serverless v1.0! Your function executed successfully!', event };
+};
+
+module.exports = {
+  getProductById,
+  getProductByIdQuery,
 };

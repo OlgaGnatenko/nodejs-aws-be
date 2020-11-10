@@ -19,7 +19,7 @@ const validateBody = (body) => {
   let { title, description, price, image, count } = body;
   if (!(title && price)) {
     return {
-      error: "Cannot POST product: Required product details are not provided",
+      error: "Cannot POST product: title and price are required",
     };
   }
 
@@ -27,10 +27,10 @@ const validateBody = (body) => {
   description = processString(description);
   image = processString(image);
 
-  count = Number(count);
-  price = Number(price);
+  count = count ? Number(count) : 0;
+  price = price ? Number(price) : 0;
 
-  if (isNaN(title) || isNaN(count)) {
+  if (isNaN(price) || isNaN(count)) {
     return {
       error: "Cannot POST product: price and count should be numeric",
     };
@@ -64,7 +64,7 @@ module.exports.postProduct = async (event) => {
     if (error) {
       return {
         headers: responseHeaders,
-        statusCode: StatusCodes.NOT_FOUND,
+        statusCode: StatusCodes.BAD_REQUEST,
         body: error,
       };
     }
@@ -74,7 +74,7 @@ module.exports.postProduct = async (event) => {
     const { rows: addedProductRow } = await dbConnection.query(
       postProductQuery(product)
     );
-    if (!rows)
+    if (!addedProductRow)
       return {
         headers: responseHeaders,
         statusCode: StatusCodes.NOT_FOUND,
@@ -90,6 +90,12 @@ module.exports.postProduct = async (event) => {
     const { rows: productWithStockRow } = await dbConnection.query(
       getProductByIdQuery(id)
     );
+    if (!productWithStockRow)
+      return {
+        headers: responseHeaders,
+        statusCode: StatusCodes.NOT_FOUND,
+        body: "Cannot POST stock: Server error",
+      };
     const productWithStock = productWithStockRow[0];
     await dbConnection.query("COMMIT");
 
@@ -100,7 +106,7 @@ module.exports.postProduct = async (event) => {
     };
   } catch (err) {
     if (dbConnection) await dbConnection.query("ROLLBACK");
-
+    console.log(err);
     return {
       statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
       headers: responseHeaders,
