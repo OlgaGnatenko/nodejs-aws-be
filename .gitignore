@@ -3,6 +3,4 @@ node_modules
 
 jspm_packages
 
-serverless.yml 
-
 package-lock.json
