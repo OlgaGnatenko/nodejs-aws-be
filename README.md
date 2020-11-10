@@ -2,6 +2,7 @@
 
 Backend for AWS Nodejs RS School.
 FE part here: https://github.com/OlgaGnatenko/nodejs-aws-fe/tree/aws-task4
+FE PR: 
 
 ## What was done 
 - Task 4.1: 
@@ -38,6 +39,12 @@ Frontend:
 - :thumbsup: All lambdas return error 500 status code on any error (DB connection, any unhandled error in code)
 
 - :thumbsup: All lambdas do console.log for each incoming requests and their arguments
+
+This was added using plugin `serverless-middleware`, all configuration was done in `serverless.yml`.
+Proof that logs are added to CloudWatch: 
+    - getProducts: https://i.imgur.com/bxvVEZi.png
+    - getProductVyId: https://i.imgur.com/Am4qgNv.png
+    - postProduct: https://i.imgur.com/6LtohZP.png 
 
 - :thumbsup: Transaction based creation of product (in case stock creation is failed then related to this stock product is not created and not ready to be used by the end user and vice versa)
 

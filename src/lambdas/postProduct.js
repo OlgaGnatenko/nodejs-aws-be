@@ -23,9 +23,9 @@ const validateBody = (body) => {
     };
   }
 
-  title = processString(title);
-  description = processString(description);
-  image = processString(image);
+  title = title ? processString(title) : "";
+  description = description ? processString(description) : "";
+  image = image ? processString(image) : "";
 
   count = count ? Number(count) : 0;
   price = price ? Number(price) : 0;
