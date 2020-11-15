@@ -23,6 +23,8 @@ frameworkVersion: '2'
 provider:
   name: aws
   runtime: nodejs12.x
+  apiGateway:
+    shouldStartNameWithService: true 
 
 # you can overwrite defaults here
   stage: dev
@@ -45,8 +47,7 @@ provider:
 #            - "/*"
 
 # you can define service wide environment variables here
-#  environment:
-#    variable1: value1
+
 
 # you can add packaging information here
 #package:
@@ -57,21 +58,37 @@ provider:
 #    - exclude-me.js
 #    - exclude-me-dir/**
 
+plugins:
+  - serverless-middleware
+
 functions:
   getProducts:
-    handler: productList.getProducts
+    handler: 
+      - src/middleware/logRequest.logRequest
+      - src/lambdas/getProductList.getProducts
     events:
     - http:
         path: products
         method: get
         cors: true
   getProductById:
-    handler: productById.getProductById
+    handler: 
+      - src/middleware/logRequest.logRequest
+      - src/lambdas/getProductById.getProductById
     events:
     - http:
         path: products/{id}
         method: get
-        cors: true  
+        cors: true
+  postProduct:
+    handler: 
+      - src/middleware/logRequest.logRequest
+      - src/lambdas/postProduct.postProduct
+    events:
+    - http:
+        path: products
+        method: post
+        cors: true            
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details
