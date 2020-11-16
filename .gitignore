@@ -3,6 +3,8 @@ node_modules
 
 jspm_packages
 
-serverless.yml 
+product-service/serverless.yml 
+product-service/.serverless
+import-service/.serverless
 
 package-lock.json

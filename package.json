@@ -4,13 +4,8 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
-    "http-status-codes": "^2.1.4",
-    "pg": "^8.4.2",
-    "serverless": "^2.10.0",
-    "uuid-validate": "0.0.3"
-  },
-  "devDependencies": {
-    "serverless-middleware": "0.0.10"
+    "aws-sdk": "^2.792.0",
+    "serverless": "^2.10.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -24,5 +19,8 @@
   "bugs": {
     "url": "https://github.com/OlgaGnatenko/nodejs-aws-be/issues"
   },
-  "homepage": "https://github.com/OlgaGnatenko/nodejs-aws-be#readme"
+  "homepage": "https://github.com/OlgaGnatenko/nodejs-aws-be#readme",
+  "devDependencies": {
+    "serverless-plugin-include-dependencies": "^4.1.0"
+  }
 }
