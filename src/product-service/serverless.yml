@@ -11,7 +11,7 @@
 #
 # Happy Coding!
 
-service: import-service
+service: product-service
 # app and org for use with dashboard.serverless.com
 #app: your-app-name
 #org: your-org-name
@@ -25,15 +25,6 @@ provider:
   runtime: nodejs12.x
   apiGateway:
     shouldStartNameWithService: true 
-
-  iamRoleStatements:
-    - Effect: "Allow"
-      Action: "s3:ListBucket"
-      Resource: "arn:aws:s3:::rs-nodejs-import"
-
-    - Effect: "Allow"
-      Action: "s3:*"
-      Resource: "arn:aws:s3:::rs-nodejs-import/*"
 
 # you can overwrite defaults here
   stage: dev
@@ -56,12 +47,12 @@ provider:
 #            - "/*"
 
 # you can define service wide environment variables here
-  # environment:
-  #   PG_HOST: 
-  #   PG_PORT: 
-  #   PG_DATABASE: 
-  #   PG_USERNAME: 
-  #   PG_PASSWORD: 
+  environment:
+    PG_HOST: rsdb.clj9b1cwtg4b.eu-west-1.rds.amazonaws.com
+    PG_PORT: 5432
+    PG_DATABASE: rsdb 
+    PG_USERNAME: postgres
+    PG_PASSWORD: xPNQBjxDjjiL43esyvHl
 
 # you can add packaging information here
 #package:
@@ -75,27 +66,37 @@ package:
   excludeDevDependencies: false 
 
 plugins:
-  - serverless-plugin-include-dependencies  
+  - serverless-middleware
+  - serverless-plugin-include-dependencies
 
 functions:
-  importProductsFile:
-    handler: lambdas/importProducts.importProductsFile
+  getProducts:
+    handler: 
+      - middleware/logRequest.logRequest
+      - lambdas/getProductList.getProducts
     events:
     - http:
-        path: import
+        path: products
         method: get
         cors: true
-  importFileParser:
-    handler: lambdas/importProducts.importFileParser
+  getProductById:
+    handler: 
+      - middleware/logRequest.logRequest
+      - lambdas/getProductById.getProductById
     events:
-    - s3:
-        bucket: rs-nodejs-import
-        event: s3:ObjectCreated:*
-        rules:
-          - prefix: uploaded/
-        existing: true  
-    # environment:
-    #   BUCKET: rs-nodejs-import      
+    - http:
+        path: products/{id}
+        method: get
+        cors: true
+  postProduct:
+    handler: 
+      - middleware/logRequest.logRequest
+      - lambdas/postProduct.postProduct
+    events:
+    - http:
+        path: products
+        method: post
+        cors: true            
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details
@@ -132,7 +133,9 @@ functions:
 #            host: example.com
 #            path: /hello
 
-
+#    Define function environment variables here
+#    environment:
+#      variable2: value2
 
 # you can add CloudFormation resource templates here
 #resources:
