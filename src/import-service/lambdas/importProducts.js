@@ -67,7 +67,7 @@ const importFileParser = (event) => {
   const copyFileInAWS = (key) => {
     return s3.copyObject({
       Bucket: bucket,
-      CopySource: `${bucket}/key`,
+      CopySource: `${bucket}/${key}`,
       Key: key.replace(catalogFolder, parsedFolder),
     }).promise();
   };
@@ -94,7 +94,7 @@ const importFileParser = (event) => {
         console.log(data);
       })
       .on("error", (err) => {
-        console.error(err);
+        console.log(`Stream error: ${err}`);
       })
       .on("end", async () => {
         try {
