@@ -17,16 +17,15 @@ const importProductsFile = async (event) => {
     };
   }
   const awsFilePath = `${catalogFolder}/${fileName}`;
-
-  const s3 = new AWS.S3({ region });
-  const params = {
-    Bucket: bucket,
-    Key: awsFilePath,
-    Expires: 60,
-    ContentType: "text/csv",
-  };
-
   try {
+    const s3 = new AWS.S3({ region });
+    const params = {
+      Bucket: bucket,
+      Key: awsFilePath,
+      Expires: 60,
+      ContentType: "text/csv",
+    };
+
     const url = await s3.getSignedUrl("putObject", params);
     return {
       statusCode: StatusCodes.OK,
@@ -53,7 +52,9 @@ const importFileParser = (event) => {
     parsedFolder,
     catalogFolder,
   } = config;
-  const s3 = new AWS.S3({ region });
+  const s3 = new AWS.S3({
+    region,
+  });
 
   const { Records: records } = event;
   if (!(records && records.length)) {
@@ -65,19 +66,39 @@ const importFileParser = (event) => {
   }
 
   const copyFileInAWS = (key) => {
-    return s3.copyObject({
-      Bucket: bucket,
-      CopySource: `${bucket}/${key}`,
-      Key: key.replace(catalogFolder, parsedFolder),
-    }).promise();
+    return s3
+      .copyObject({
+        Bucket: bucket,
+        CopySource: `${bucket}/${key}`,
+        Key: key.replace(catalogFolder, parsedFolder),
+      })
+      .promise();
   };
 
   const deleteFileInAWS = (key) => {
-    return s3.deleteObject({
-      Bucket: bucket,
-      Key: key,
-    }).promise();
+    return s3
+      .deleteObject({
+        Bucket: bucket,
+        Key: key,
+      })
+      .promise();
   };
+
+  const validateCSVStructure = (product) => {
+    const { requiredCSVFields } = config;
+    for (const field of requiredCSVFields) {
+      if (!product[field])
+        return {
+          status: false,
+          message: `Required column \"${field}\" is missing in CSV file`,
+        };
+    }
+    return {
+      status: true,
+    };
+  };
+
+  const sqs = new AWS.SQS();
 
   records.forEach((record) => {
     const { key } = record.s3.object;
@@ -90,8 +111,22 @@ const importFileParser = (event) => {
 
     s3Stream
       .pipe(csvParser())
-      .on("data", (data) => {
-        console.log(data);
+      .on("data", async (data) => {
+        try {
+          const result = validateCSVStructure(data);
+          if (!result.status) {
+            throw new Error(result.message);
+          }
+          await sqs
+            .sendMessage({
+              QueueUrl: process.env.SQS_URL,
+              MessageBody: JSON.stringify(data),
+            })
+            .promise();
+          console.log(data);
+        } catch (err) {
+          console.log(`Error processing data: ${err}`);
+        }
       })
       .on("error", (err) => {
         console.log(`Stream error: ${err}`);

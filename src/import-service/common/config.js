@@ -7,4 +7,5 @@ module.exports = {
     "Access-Control-Allow-Credentials": true,
   },
   parsedFolder: "parsed",
+  requiredCSVFields: ["title", "price", "count"]
 };
