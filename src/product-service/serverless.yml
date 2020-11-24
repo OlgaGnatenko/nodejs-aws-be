@@ -30,6 +30,12 @@ provider:
   stage: dev
   region: eu-west-1
 
+  iamRoleStatements:
+  - Effect: "Allow"
+    Action: "sns:*"
+    Resource: 
+      Ref: createProductTopic
+
 # you can add statements to the Lambda function's IAM Role here
 #  iamRoleStatements:
 #    - Effect: "Allow"
@@ -47,7 +53,9 @@ provider:
 #            - "/*"
 
 # you can define service wide environment variables here
-
+  environment:
+    SNS_ARN: 
+      Ref: createProductTopic  
 
 # you can add packaging information here
 #package:
@@ -57,6 +65,21 @@ provider:
 #  exclude:
 #    - exclude-me.js
 #    - exclude-me-dir/**
+
+resources:
+  Resources:
+    createProductTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: sns-catalog-items-queue-og  
+    SNSSubscription:
+      Type: AWS::SNS::Subscription
+      Properties:
+        Endpoint: testuser1ognatenko@gmail.com
+        Protocol: email
+        TopicArn: 
+          Ref: createProductTopic
+
 package:
   excludeDevDependencies: false 
 
