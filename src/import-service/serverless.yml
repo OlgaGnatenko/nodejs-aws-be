@@ -11,7 +11,7 @@
 #
 # Happy Coding!
 
-service: product-service
+service: import-service
 # app and org for use with dashboard.serverless.com
 #app: your-app-name
 #org: your-org-name
@@ -25,6 +25,15 @@ provider:
   runtime: nodejs12.x
   apiGateway:
     shouldStartNameWithService: true 
+
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action: "s3:ListBucket"
+      Resource: "arn:aws:s3:::rs-nodejs-import"
+
+    - Effect: "Allow"
+      Action: "s3:*"
+      Resource: "arn:aws:s3:::rs-nodejs-import/*"
 
 # you can overwrite defaults here
   stage: dev
@@ -47,7 +56,12 @@ provider:
 #            - "/*"
 
 # you can define service wide environment variables here
-
+  # environment:
+  #   PG_HOST: 
+  #   PG_PORT: 
+  #   PG_DATABASE: 
+  #   PG_USERNAME: 
+  #   PG_PASSWORD: 
 
 # you can add packaging information here
 #package:
@@ -57,38 +71,31 @@ provider:
 #  exclude:
 #    - exclude-me.js
 #    - exclude-me-dir/**
+package:
+  excludeDevDependencies: false 
 
 plugins:
-  - serverless-middleware
+  - serverless-plugin-include-dependencies  
 
 functions:
-  getProducts:
-    handler: 
-      - src/middleware/logRequest.logRequest
-      - src/lambdas/getProductList.getProducts
+  importProductsFile:
+    handler: lambdas/importProducts.importProductsFile
     events:
     - http:
-        path: products
+        path: import
         method: get
         cors: true
-  getProductById:
-    handler: 
-      - src/middleware/logRequest.logRequest
-      - src/lambdas/getProductById.getProductById
+  importFileParser:
+    handler: lambdas/importProducts.importFileParser
     events:
-    - http:
-        path: products/{id}
-        method: get
-        cors: true
-  postProduct:
-    handler: 
-      - src/middleware/logRequest.logRequest
-      - src/lambdas/postProduct.postProduct
-    events:
-    - http:
-        path: products
-        method: post
-        cors: true            
+    - s3:
+        bucket: rs-nodejs-import
+        event: s3:ObjectCreated:*
+        rules:
+          - prefix: uploaded/
+        existing: true  
+    # environment:
+    #   BUCKET: rs-nodejs-import      
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details
@@ -125,9 +132,7 @@ functions:
 #            host: example.com
 #            path: /hello
 
-#    Define function environment variables here
-#    environment:
-#      variable2: value2
+
 
 # you can add CloudFormation resource templates here
 #resources:

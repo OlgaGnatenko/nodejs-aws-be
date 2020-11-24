@@ -30,9 +30,13 @@ const validateBody = (body) => {
   count = count ? Number(count) : 0;
   price = price ? Number(price) : 0;
 
-  if (isNaN(price) || isNaN(count)) {
+  const isPriceValid = !(isNaN(price)) && (price >= 0);
+  const isCountValid = !(isNaN(count)) && (count >= 0);
+
+  if (!(isPriceValid && isCountValid)) {
     return {
-      error: "Cannot POST product: price and count should be numeric",
+      error:
+        "Cannot POST product: price and count should be numeric and non-negative",
     };
   }
 
