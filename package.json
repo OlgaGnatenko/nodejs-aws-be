@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
-    "aws-sdk": "^2.792.0",
+    "aws-sdk": "^2.798.0",
     "serverless": "^2.10.0"
   },
   "scripts": {

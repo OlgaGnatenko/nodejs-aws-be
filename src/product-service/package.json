@@ -9,12 +9,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "pg": "^8.5.1",
     "http-status-codes": "^2.1.4",
+    "pg": "^8.5.1",
     "uuid-validate": "0.0.3"
   },
   "devDependencies": {
     "serverless-middleware": "0.0.10"
-
   }
 }

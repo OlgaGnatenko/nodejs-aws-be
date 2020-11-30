@@ -2,8 +2,8 @@
 const dbHelper = require("../helpers/db.helper");
 const { responseHeaders } = require("../common/config");
 const { StatusCodes } = require("http-status-codes");
-const { processString } = require("../helpers/string.helper");
 const { getProductByIdQuery } = require("./getProductById");
+const { validateBody } = require("../helpers/validate.helper");
 
 const postProductQuery = ({ title, description = "", image = "", price }) => `
   INSERT INTO products (title, description, image, price) VALUES
@@ -15,43 +15,45 @@ const postStockQuery = ({ product_id, count = 0 }) => `
     ('${product_id}', ${count}) RETURNING id  
 `;
 
-const validateBody = (body) => {
-  let { title, description, price, image, count } = body;
-  if (!(title && price)) {
+const addProductToDB = async (dbConnection, product) => {
+  try {
+    await dbConnection.query("BEGIN");
+    const { rows: addedProductRow } = await dbConnection.query(
+      postProductQuery(product)
+    );
+    if (!addedProductRow)
+      return {
+        statusCode: StatusCodes.NOT_FOUND,
+        body: "Cannot POST product: Server error",
+      };
+
+    const { id } = addedProductRow[0];
+
+    await dbConnection.query(
+      postStockQuery({ product_id: id, count: product.count })
+    );
+    await dbConnection.query("COMMIT");
+
+    const { rows: productWithStockRow } = await dbConnection.query(
+      getProductByIdQuery(id)
+    );
+    const productWithStock = productWithStockRow[0];
+
     return {
-      error: "Cannot POST product: title and price are required",
+      statusCode: StatusCodes.OK,
+      body: JSON.stringify(productWithStock),
+    };
+  } catch (err) {
+    if (dbConnection) await dbConnection.query("ROLLBACK");
+    console.log(err);
+    return {
+      statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+      body: `Server error: ${JSON.stringify(err.message)}`,
     };
   }
-
-  title = title ? processString(title) : "";
-  description = description ? processString(description) : "";
-  image = image ? processString(image) : "";
-
-  count = count ? Number(count) : 0;
-  price = price ? Number(price) : 0;
-
-  const isPriceValid = !(isNaN(price)) && (price >= 0);
-  const isCountValid = !(isNaN(count)) && (count >= 0);
-
-  if (!(isPriceValid && isCountValid)) {
-    return {
-      error:
-        "Cannot POST product: price and count should be numeric and non-negative",
-    };
-  }
-
-  return {
-    product: {
-      title,
-      description,
-      price,
-      image,
-      count,
-    },
-  };
 };
 
-module.exports.postProduct = async (event) => {
+const postProduct = async (event) => {
   let dbConnection = null;
 
   try {
@@ -73,34 +75,12 @@ module.exports.postProduct = async (event) => {
       };
     }
 
-    const dbConnection = await dbHelper.connectToDB();
-    await dbConnection.query("BEGIN");
-    const { rows: addedProductRow } = await dbConnection.query(
-      postProductQuery(product)
-    );
-    if (!addedProductRow)
-      return {
-        headers: responseHeaders,
-        statusCode: StatusCodes.NOT_FOUND,
-        body: "Cannot POST product: Server error",
-      };
-
-    const { id } = addedProductRow[0];
-
-    await dbConnection.query(
-      postStockQuery({ product_id: id, count: product.count })
-    );
-    await dbConnection.query("COMMIT");
-
-    const { rows: productWithStockRow } = await dbConnection.query(
-      getProductByIdQuery(id)
-    );
-    const productWithStock = productWithStockRow[0];
+    dbConnection = await dbHelper.connectToDB();
+    const addProductResponse = await addProductToDB(dbConnection, product);
 
     return {
-      statusCode: StatusCodes.OK,
+      ...addProductResponse,
       headers: responseHeaders,
-      body: JSON.stringify(productWithStock),
     };
   } catch (err) {
     if (dbConnection) await dbConnection.query("ROLLBACK");
@@ -113,7 +93,9 @@ module.exports.postProduct = async (event) => {
   } finally {
     if (dbConnection) dbConnection.end();
   }
+};
 
-  // Use this code if you don't use the http event with the LAMBDA-PROXY integration
-  // return { message: 'Go Serverless v1.0! Your function executed successfully!', event };
+module.exports = {
+  addProductToDB,
+  postProduct,
 };

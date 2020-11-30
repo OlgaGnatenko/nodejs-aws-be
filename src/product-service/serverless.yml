@@ -11,7 +11,7 @@
 #
 # Happy Coding!
 
-service: import-service
+service: product-service
 # app and org for use with dashboard.serverless.com
 #app: your-app-name
 #org: your-org-name
@@ -25,28 +25,16 @@ provider:
   runtime: nodejs12.x
   apiGateway:
     shouldStartNameWithService: true 
+
 # you can overwrite defaults here
   stage: dev
   region: eu-west-1
 
-  environment:
-    SQS_URL: https://sqs.eu-west-1.amazonaws.com/945801221201/sqs-catalog-items-queue-og
-      # Ref: CatalogItemsQueue
-
   iamRoleStatements:
-    - Effect: "Allow"
-      Action: "s3:ListBucket"
-      Resource: "arn:aws:s3:::rs-nodejs-import"
-
-    - Effect: "Allow"
-      Action: "s3:*"
-      Resource: "arn:aws:s3:::rs-nodejs-import/*"
-
-    - Effect: "Allow"
-      Action: 
-        - "sqs:*"
-      Resource: "arn:aws:sqs:eu-west-1:945801221201:sqs-catalog-items-queue-og"
-
+  - Effect: "Allow"
+    Action: "sns:*"
+    Resource: 
+      Ref: createProductTopic
 
 # you can add statements to the Lambda function's IAM Role here
 #  iamRoleStatements:
@@ -65,12 +53,9 @@ provider:
 #            - "/*"
 
 # you can define service wide environment variables here
-  # environment:
-  #   PG_HOST: 
-  #   PG_PORT: 
-  #   PG_DATABASE: 
-  #   PG_USERNAME: 
-  #   PG_PASSWORD: 
+  environment:
+    SNS_ARN: 
+      Ref: createProductTopic  
 
 # you can add packaging information here
 #package:
@@ -80,47 +65,63 @@ provider:
 #  exclude:
 #    - exclude-me.js
 #    - exclude-me-dir/**
+
+resources:
+  Resources:
+    createProductTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: sns-catalog-items-queue-og  
+    SNSSubscription:
+      Type: AWS::SNS::Subscription
+      Properties:
+        Endpoint: testuser1ognatenko@gmail.com
+        Protocol: email
+        TopicArn: 
+          Ref: createProductTopic
+
 package:
   excludeDevDependencies: false 
 
 plugins:
-  - serverless-plugin-include-dependencies  
+  - serverless-middleware
+  - serverless-plugin-include-dependencies
 
 functions:
-  importProductsFile:
-    handler: lambdas/importProducts.importProductsFile
+  getProducts:
+    handler: 
+      - middleware/logRequest.logRequest
+      - lambdas/getProductList.getProducts
     events:
     - http:
-        path: import
+        path: products
         method: get
         cors: true
-  importFileParser:
-    handler: lambdas/importProducts.importFileParser
+  getProductById:
+    handler: 
+      - middleware/logRequest.logRequest
+      - lambdas/getProductById.getProductById
     events:
-    - s3:
-        bucket: rs-nodejs-import
-        event: s3:ObjectCreated:*
-        rules:
-          - prefix: uploaded/
-        existing: true  
+    - http:
+        path: products/{id}
+        method: get
+        cors: true
+  postProduct:
+    handler: 
+      - middleware/logRequest.logRequest
+      - lambdas/postProduct.postProduct
+    events:
+    - http:
+        path: products
+        method: post
+        cors: true    
+  catalogBatchProcess:
+    handler: lambdas/catalogItems.catalogBatchProcess
+    events:
+      - sqs: 
+          batchSize: 5
+          arn: arn:aws:sqs:eu-west-1:945801221201:sqs-catalog-items-queue-og
 
-resources:
-  Resources:
-    CatalogItemsQueue:
-      Type: "AWS::SQS::Queue"
-      Properties:
-        QueueName: sqs-catalog-items-queue-og
-
-  Outputs:
-    SQSQueueUrl: 
-      Value:
-        Ref: CatalogItemsQueue
-
-    SQSQueueArn:
-      Value:
-        Fn::GetAtt: [CatalogItemsQueue, Arn]
-    # environment:
-    #   BUCKET: rs-nodejs-import      
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details
@@ -157,7 +158,9 @@ resources:
 #            host: example.com
 #            path: /hello
 
-
+#    Define function environment variables here
+#    environment:
+#      variable2: value2
 
 # you can add CloudFormation resource templates here
 #resources:
