@@ -54,6 +54,11 @@ provider:
 
 # you can define service wide environment variables here
   environment:
+    PG_HOST: rsdb.clj9b1cwtg4b.eu-west-1.rds.amazonaws.com
+    PG_PORT: 5432
+    PG_DATABASE: rsdb 
+    PG_USERNAME: postgres
+    PG_PASSWORD: xPNQBjxDjjiL43esyvHl
     SNS_ARN: 
       Ref: createProductTopic  
 
