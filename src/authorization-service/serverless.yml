@@ -11,7 +11,7 @@
 #
 # Happy Coding!
 
-service: import-service
+service: authorization-service
 # app and org for use with dashboard.serverless.com
 #app: your-app-name
 #org: your-org-name
@@ -20,33 +20,17 @@ service: import-service
 # Check out our docs for more details
 frameworkVersion: '2'
 
+plugins:
+  - serverless-dotenv-plugin 
+
 provider:
   name: aws
   runtime: nodejs12.x
-  apiGateway:
-    shouldStartNameWithService: true 
-# you can overwrite defaults here
-  stage: dev
   region: eu-west-1
 
-  environment:
-    SQS_URL: https://sqs.eu-west-1.amazonaws.com/945801221201/sqs-catalog-items-queue-og
-      # Ref: CatalogItemsQueue
-
-  iamRoleStatements:
-    - Effect: "Allow"
-      Action: "s3:ListBucket"
-      Resource: "arn:aws:s3:::rs-nodejs-import"
-
-    - Effect: "Allow"
-      Action: "s3:*"
-      Resource: "arn:aws:s3:::rs-nodejs-import/*"
-
-    - Effect: "Allow"
-      Action: 
-        - "sqs:*"
-      Resource: "arn:aws:sqs:eu-west-1:945801221201:sqs-catalog-items-queue-og"
-
+# you can overwrite defaults here
+#  stage: dev
+#  region: us-east-1
 
 # you can add statements to the Lambda function's IAM Role here
 #  iamRoleStatements:
@@ -65,12 +49,8 @@ provider:
 #            - "/*"
 
 # you can define service wide environment variables here
-  # environment:
-  #   PG_HOST: 
-  #   PG_PORT: 
-  #   PG_DATABASE: 
-  #   PG_USERNAME: 
-  #   PG_PASSWORD: 
+#  environment:
+#    variable1: value1
 
 # you can add packaging information here
 #package:
@@ -80,53 +60,10 @@ provider:
 #  exclude:
 #    - exclude-me.js
 #    - exclude-me-dir/**
-package:
-  excludeDevDependencies: false 
-
-plugins:
-  - serverless-plugin-include-dependencies  
 
 functions:
-  importProductsFile:
-    handler: lambdas/importProducts.importProductsFile
-    events:
-    - http:
-        path: import
-        method: get
-        cors: true
-        authorizer:
-          name: basicAuthorizer 
-          arn: arn:aws:lambda:eu-west-1:945801221201:function:authorization-service-dev-authorizer
-          resultTtlInSeconds: 0
-          identitySource: method.request.header.Authorization
-          type: token 
-  importFileParser:
-    handler: lambdas/importProducts.importFileParser
-    events:
-    - s3:
-        bucket: rs-nodejs-import
-        event: s3:ObjectCreated:*
-        rules:
-          - prefix: uploaded/
-        existing: true  
-
-resources:
-  Resources:
-    CatalogItemsQueue:
-      Type: "AWS::SQS::Queue"
-      Properties:
-        QueueName: sqs-catalog-items-queue-og
-
-  Outputs:
-    SQSQueueUrl: 
-      Value:
-        Ref: CatalogItemsQueue
-
-    SQSQueueArn:
-      Value:
-        Fn::GetAtt: [CatalogItemsQueue, Arn]
-    # environment:
-    #   BUCKET: rs-nodejs-import      
+  authorizer:
+    handler: auth.basicAuthorizer
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details
@@ -163,7 +100,9 @@ resources:
 #            host: example.com
 #            path: /hello
 
-
+#    Define function environment variables here
+#    environment:
+#      variable2: value2
 
 # you can add CloudFormation resource templates here
 #resources:

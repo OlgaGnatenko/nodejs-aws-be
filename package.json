@@ -5,7 +5,10 @@
   "main": "index.js",
   "dependencies": {
     "aws-sdk": "^2.798.0",
-    "serverless": "^2.10.0"
+    "dotenv": "^8.2.0",
+    "http-status-codes": "^2.1.4",
+    "serverless": "^2.10.0",
+    "serverless-dotenv-plugin": "^3.1.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
