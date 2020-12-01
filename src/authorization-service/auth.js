@@ -21,7 +21,7 @@ const basicAuthorizer = async (event, context, callback) => {
 
     callback(null, policy);
   } catch (err) {
-    callback(`Unauthorized: ${err.message}`);
+    callback("Unauthorized");
   }
 
   const {} = event;
