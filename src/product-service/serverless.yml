@@ -54,11 +54,11 @@ provider:
 
 # you can define service wide environment variables here
   environment:
-    PG_HOST: rsdb.clj9b1cwtg4b.eu-west-1.rds.amazonaws.com
-    PG_PORT: 5432
-    PG_DATABASE: rsdb 
-    PG_USERNAME: postgres
-    PG_PASSWORD: xPNQBjxDjjiL43esyvHl
+    PG_HOST: ${env.PG_HOST}
+    PG_PORT: ${env.PG_PORT}
+    PG_DATABASE: ${env.PG_DATABASE}
+    PG_USERNAME: ${env.PG_USERNAME}
+    PG_PASSWORD: ${env.PG_PASSWORD}
     SNS_ARN: 
       Ref: createProductTopic  
 
@@ -89,6 +89,7 @@ package:
   excludeDevDependencies: false 
 
 plugins:
+  - serverless-dotenv-plugin 
   - serverless-middleware
   - serverless-plugin-include-dependencies
 
