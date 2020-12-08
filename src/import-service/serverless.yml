@@ -94,6 +94,12 @@ functions:
         path: import
         method: get
         cors: true
+        authorizer:
+          name: basicAuthorizer 
+          arn: arn:aws:lambda:eu-west-1:945801221201:function:authorization-service-dev-authorizer
+          resultTtlInSeconds: 0
+          identitySource: method.request.header.Authorization
+          type: token 
   importFileParser:
     handler: lambdas/importProducts.importFileParser
     events:
@@ -111,6 +117,24 @@ resources:
       Properties:
         QueueName: sqs-catalog-items-queue-og
 
+    GatewayResponseDenied:
+      Type: AWS::ApiGateway::GatewayResponse
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Credentials: "'true'"
+        ResponseType: ACCESS_DENIED
+        RestApiId: !Ref ApiGatewayRestApi
+    
+    GatewayResponseUnauthorized:
+      Type: AWS::ApiGateway::GatewayResponse
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Credentials: "'true'"
+        ResponseType: UNAUTHORIZED
+        RestApiId: !Ref ApiGatewayRestApi        
+
   Outputs:
     SQSQueueUrl: 
       Value:
@@ -119,6 +143,7 @@ resources:
     SQSQueueArn:
       Value:
         Fn::GetAtt: [CatalogItemsQueue, Arn]
+
     # environment:
     #   BUCKET: rs-nodejs-import      
 #    The following are a few example events you can configure
