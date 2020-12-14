@@ -112,6 +112,7 @@ functions:
         path: products/{id}
         method: get
         cors: true
+        
   postProduct:
     handler: 
       - middleware/logRequest.logRequest
@@ -120,7 +121,18 @@ functions:
     - http:
         path: products
         method: post
-        cors: true    
+        cors: true  
+        
+  deleteProduct:
+    handler: 
+      - middleware/logRequest.logRequest
+      - lambdas/deleteProduct.deleteProduct
+    events:
+    - http:
+        path: products/{id}
+        method: delete
+        cors: true 
+
   catalogBatchProcess:
     handler: lambdas/catalogItems.catalogBatchProcess
     events:

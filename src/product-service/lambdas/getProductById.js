@@ -2,9 +2,7 @@
 const dbHelper = require("../helpers/db.helper");
 const { responseHeaders } = require("../common/config");
 const { StatusCodes } = require("http-status-codes");
-const validate = require("uuid-validate");
-
-const UUID_VERSION = 4;
+const extractIdFromPath = require("../helpers/id.helper");
 
 const getProductByIdQuery = (id) => `
   select products.id, products.title, products.description, products.price, products.image, stocks."count" from products 
@@ -17,23 +15,11 @@ const getProductById = async (event) => {
   let dbConnection = null;
 
   try {
-    let id = null;
-    if (event.pathParameters) {
-      id = event.pathParameters.id;
+    const extractedId = extractIdFromPath(event);
+    if (extractedId.error) {
+      return extractedId.error;
     }
-    if (!id)
-      return {
-        headers: responseHeaders,
-        statusCode: StatusCodes.FORBIDDEN,
-        body: "Id is missing in the query parameters",
-      };
-    if (!validate(id, UUID_VERSION)) {
-      return {
-        headers: responseHeaders,
-        statusCode: StatusCodes.FORBIDDEN,
-        body: `Id ${id} is not a valid UUID`,
-      };
-    }
+    const { id } = extractedId;
     dbConnection = await dbHelper.connectToDB();
     const productQueryResult = await dbConnection.query(
       getProductByIdQuery(id)
