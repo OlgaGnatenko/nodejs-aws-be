@@ -8,3 +8,5 @@ product-service/.serverless
 import-service/.serverless
 
 package-lock.json
+
+.env
