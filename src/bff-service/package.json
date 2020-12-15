@@ -8,7 +8,7 @@
     "stop": "pm2 stop bff",
     "test": "echo \"Error: no test specified\" && exit 1",
     "eb init": "eb init --platform node.js --region eu-west-1",
-    "eb create": "eb create dev --single --cname olgagnatenko-bff-api-dev",
+    "eb create": "eb create dev1 --single --cname olgagnatenko-bff-api-dev1",
     "eb terminate": ""
   },
   "author": "OGnatenko",
