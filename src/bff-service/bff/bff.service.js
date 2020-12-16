@@ -21,14 +21,14 @@ const extractAxiosOptions = (req) => {
   const queryString =
     queryIndex >= 0 ? `?${originalUrl.slice(queryIndex + 1)}` : "";
   const axiosUrl = `${recipientUrl}/${remainingPath}${queryString}`;
-  const data = {
+  const axiosConfig = {
     method,
     url: axiosUrl,
   };
   const hasBody = Object.keys(body || {}).length > 0;
-  if (hasBody) axiosOptions.body = body;
+  if (hasBody) axiosConfig.data = body;
   return {
-    data,
+    axiosConfig,
   };
 };
 
@@ -39,7 +39,7 @@ const applyBff = async (req) => {
   }
   let axiosResult = null;
   try {
-    axiosResult = await axios(extractedAxiosOptions.data);
+    axiosResult = await axios(extractedAxiosOptions.axiosConfig);
   } catch (error) {
     const { isAxiosError } = error;
     if (isAxiosError && error.response) {
