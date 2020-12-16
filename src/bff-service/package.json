@@ -4,8 +4,9 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "start": "pm2 start server.js --name \"bff\"",
+    "start": "pm2 start server.js --name bff",
     "stop": "pm2 stop bff",
+    "poststart": "pm2 logs",
     "test": "echo \"Error: no test specified\" && exit 1",
     "eb init": "eb init --platform node.js --region eu-west-1",
     "eb create": "eb create dev1 --single --cname olgagnatenko-bff-api-dev1",
